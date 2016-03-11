@@ -1,14 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 - Extract zip file
-```{r echo=TRUE}
+
+```r
 if(!file.exists("activity.csv"))
 {
     if(file.exists("activity.zip"))
@@ -19,61 +15,86 @@ if(!file.exists("activity.csv"))
 ```
 
 - Load Data
-```{r echo=TRUE}
+
+```r
 activity<-read.csv("activity.csv")
 ```
 
 - Process/transform the data (if necessary) into a format suitable for your analysis
-```{r echo=TRUE}
+
+```r
 activity$steps<-as.numeric(activity$steps)
 ```
 
 ## What is mean total number of steps taken per day?
 
 - Calculate the total number of steps taken per day
-```{r echo=TRUE}
+
+```r
 totalSteps<-aggregate(steps~date,data=activity,FUN=sum,na.rm=TRUE)
 ```
 
 - Make a histogram of the total number of steps taken each day
-```{r echo=TRUE}
+
+```r
 hist(totalSteps$steps,breaks=15,col="Red",xlab="Total Steps",ylab="Number of days", main = "Histogram of Total Number of Steps taken each day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)\
+
 - Calculate and report the mean and median of the total number of steps taken per day
-```{r echo=TRUE}
+
+```r
 stepsMean<-mean(totalSteps$steps)
 stepsMedian<-median(totalSteps$steps)
 ```
 
-```{r echo=FALSE}
-print(paste('Mean: ',stepsMean))
-print(paste('Median: ',stepsMedian))
+
+```
+## [1] "Mean:  10766.1886792453"
+```
+
+```
+## [1] "Median:  10765"
 ```
 
 ## What is the average daily activity pattern?
 - Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r echo=TRUE}
+
+```r
 averageSteps<-aggregate(steps~interval,data = activity,FUN=mean,na.rm=TRUE)
 plot(averageSteps$interval,averageSteps$steps,type="l",xlab="5-minute interval",ylab="Average Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)\
+
 - Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r echo=TRUE}
+
+```r
 averageSteps[which.max(averageSteps$steps),]$interval
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 - Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r echo=TRUE}
+
+```r
 sum(is.na(activity$steps))
 ```
 
+```
+## [1] 2304
+```
+
 - Devise a strategy for filling in all of the missing values in the dataset. Using mean for that 5-minute interval
-```{r echo=TRUE}
+
+```r
 averageStepsForInterval<-function(intVal)
 {
     averageSteps[averageSteps$interval==intVal,]$steps
@@ -82,7 +103,8 @@ averageStepsForInterval<-function(intVal)
 
 - Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r echo=TRUE}
+
+```r
 newActivity<-activity
 
 for(i in 1:nrow(newActivity))
@@ -95,30 +117,49 @@ for(i in 1:nrow(newActivity))
 ```
 
 - Make a histogram of the total number of steps taken each day
-```{r echo=TRUE}
+
+```r
 newTotalSteps<-aggregate(steps~date,data=newActivity,FUN=sum)
 hist(newTotalSteps$steps,xlab="Total Steps",ylab="Number of Days",col = "blue",breaks=15)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)\
+
 - Calculate and report the mean and median total number of steps taken per day.
-```{r echo=TRUE}
+
+```r
 mean(newTotalSteps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(newTotalSteps$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 - Do these values differ from the estimates from the first part of the assignment?
 No, the mean and median do not really differ 
 ## Are there differences in activity patterns between weekdays and weekends?
 - Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
-```{r echo=TRUE}
+
+```r
 newActivity$day<-ifelse(weekdays(as.Date(newActivity$date)) %in% c("Saturday","Sunday"),"weekend","weekday")
 newActivity$day=factor(newActivity$day,levels=c("weekday","weekend"))
 ```
 
 - Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r echo=TRUE}
+
+```r
 newActivity=aggregate(steps~interval+day,newActivity,mean)
 library(lattice)
-xyplot(steps~interval|factor(day),data=newActivity,aspect=1/2,type="l",ylab="Number of Steps")
-``` 
+xyplot(steps~interval|factor(day),data=newActivity,aspect=1/2,type="l")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png)\
